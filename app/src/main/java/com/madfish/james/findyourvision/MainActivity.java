@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,38 +25,15 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    Camera camera;
-    private final int CAMERA_REQUEST_CODE = 100;
-    private final int REQUEST_CODE_STORAGE_PERM = 321;
+    CameraDevice mCameraDevice;
 
-    private boolean hasPermission()
-    {
-        int res =0 ;
-        String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        for(String perms : permissions){
-            res = checkCallingOrSelfPermission(perms);
-            if(!(res == PackageManager.PERMISSION_GRANTED)){
-                return false;
-            }
-        }
-        return true;
-
-    }
-    private void requestNecessaryPermissions() {
-        // make array of permissions which you want to ask from user.
-        String[] permissions = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // have arry for permissions to requestPermissions method.
-            // and also send unique Request code.
-            requestPermissions(permissions, REQUEST_CODE_STORAGE_PERM);
-        }
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode,  String[] permissions,int[] grandResults){
         boolean allowed = true;
+
         switch(requestCode){
-            case REQUEST_CODE_STORAGE_PERM :
+            //camera access storage access
+            case  CameraDevice.REQUEST_CODE_STORAGE_PERM:
                 for(int res : grandResults){
                     allowed = allowed && (res == PackageManager.PERMISSION_GRANTED);
                     Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
@@ -66,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if(allowed){
             doRestart(this);
-        }else{
+        }else{//what is this?
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                     Toast.makeText(MainActivity.this, "Camera Permissions denied", Toast.LENGTH_SHORT).show();
@@ -119,7 +98,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_main);
+        // setting camera functions
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            if (!mCameraDevice.hasPermissions()) {
+                // your app doesn't have permissions, ask for them.
+                mCameraDevice.requestNecessaryPermissions();
+            } else {
+                // your app already have permissions allowed.
+                // do what you want.
+                //startCamera();
+            }
+        } else {
+            Toast.makeText(MainActivity.this, "Camera not supported", Toast.LENGTH_LONG).show();
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -144,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        startCamera();
+        mCameraDevice.startCamera();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
