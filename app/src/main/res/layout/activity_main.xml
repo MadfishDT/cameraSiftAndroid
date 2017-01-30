@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:id = "@+id/parentFrame"
     tools:context="com.madfish.james.findyourvision.MainActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -30,10 +31,12 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_dialog_email" />
-    <SurfaceView
-        android:id = "@+id/mainCam"
+    <TextureView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:id="@+id/cameraTextureView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:text="Capture"
